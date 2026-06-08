@@ -45,12 +45,21 @@ function renderStats() {
   `).join('');
 }
 
+function getThemeColors() {
+  const styles = getComputedStyle(document.documentElement);
+  return {
+    muted: styles.getPropertyValue('--muted').trim() || '#94a3b8',
+    border: styles.getPropertyValue('--border').trim() || '#334155',
+  };
+}
+
 function renderCharts() {
   charts.forEach(c => c.destroy());
   charts = [];
 
-  Chart.defaults.color = '#94a3b8';
-  Chart.defaults.borderColor = '#334155';
+  const { muted, border } = getThemeColors();
+  Chart.defaults.color = muted;
+  Chart.defaults.borderColor = border;
 
   // Risk chart
   const riskCounts = {};
@@ -203,6 +212,8 @@ function init() {
     clearStudents();
     window.location.href = 'index.html';
   });
+
+  document.addEventListener('milestone:themechange', renderCharts);
 }
 
 init();
