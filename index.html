@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Milestone Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Noto Sans Thai', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .stat-card .value { font-size: 32px; font-weight: 700; }
+  .stat-card .label { color: var(--muted); font-size: 13px; }
+  .charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .chart-card h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); font-weight: 600; }
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--card); cursor: pointer; }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.ontrack { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge.atrisk { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.delayed { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filters select, .filters input {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>Milestone Dashboard</h1>
+  <div class="subtitle">Graduate student progress tracking</div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="charts">
+    <div class="chart-card"><h3>Risk Status</h3><canvas id="riskChart"></canvas></div>
+    <div class="chart-card"><h3>Students by Year</h3><canvas id="yearChart"></canvas></div>
+    <div class="chart-card"><h3>Milestone Progress (QE / Proposal / Thesis Defense)</h3><canvas id="milestoneChart"></canvas></div>
+    <div class="chart-card"><h3>Student Status</h3><canvas id="statusChart"></canvas></div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="searchBox" placeholder="Search by name, ID, or advisor..." />
+    <select id="riskFilter">
+      <option value="">All Risk Statuses</option>
+      <option value="On Track">On Track</option>
+      <option value="At Risk">At Risk</option>
+    </select>
+    <select id="yearFilter">
+      <option value="">All Years</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th data-key="id">ID</th>
+          <th data-key="name">Student</th>
+          <th data-key="year">Year</th>
+          <th data-key="status">Status</th>
+          <th data-key="advisor">Advisor</th>
+          <th data-key="qe">QE</th>
+          <th data-key="proposal">Proposal</th>
+          <th data-key="thesisDefense">Thesis Defense</th>
+          <th data-key="english">English</th>
+          <th data-key="publications">Pubs</th>
+          <th data-key="risk">Risk</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <footer>Generated from Milestone Database CSV &middot; <span id="count"></span> students</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
