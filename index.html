@@ -82,11 +82,90 @@
     font-size: 13px;
   }
   footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+
+  .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+  .header-row h1 { margin: 0 0 4px; }
+  .ghost-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ghost-btn:hover { background: rgba(56,189,248,0.1); }
+
+  .upload-screen {
+    min-height: calc(100vh - 48px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .upload-card {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+  .upload-card h1 { margin-bottom: 4px; }
+  .upload-card .subtitle { margin-bottom: 24px; }
+  .dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 24px;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--accent);
+    background: rgba(56,189,248,0.06);
+    color: var(--text);
+  }
+  .upload-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+  .upload-hint {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
-  <h1>Milestone Dashboard</h1>
-  <div class="subtitle">Graduate student progress tracking</div>
+  <div id="uploadScreen" class="upload-screen">
+    <div class="upload-card">
+      <h1>Milestone Dashboard</h1>
+      <div class="subtitle">Upload a Milestone Database CSV to get started</div>
+      <label for="csvInput" class="dropzone" id="dropzone">
+        <span id="dropzoneText">Click to choose a CSV file, or drag and drop it here</span>
+        <input type="file" id="csvInput" accept=".csv,text/csv" hidden />
+      </label>
+      <div id="uploadError" class="upload-error"></div>
+      <div class="upload-hint">Expected columns: IDs, Students, Year, Student status, Advisors, QE status, Proposal defense status, Thesis defense status, Thesis submission, English requirement, EC approval, Publications, Risk status</div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="dashboard" hidden>
+  <div class="header-row">
+    <div>
+      <h1>Milestone Dashboard</h1>
+      <div class="subtitle">Graduate student progress tracking</div>
+    </div>
+    <button id="changeFileBtn" class="ghost-btn">Upload a different CSV</button>
+  </div>
 
   <div class="stats" id="stats"></div>
 
@@ -131,8 +210,8 @@
   </div>
 
   <footer>Generated from Milestone Database CSV &middot; <span id="count"></span> students</footer>
+  </div>
 
-<script src="data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
