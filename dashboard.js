@@ -3,113 +3,6 @@ let sortKey = null;
 let sortAsc = true;
 let charts = [];
 
-// ---- CSV parsing ----
-
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i + 1] === '"') { field += '"'; i++; }
-        else inQuotes = false;
-      } else {
-        field += c;
-      }
-    } else {
-      if (c === '"') inQuotes = true;
-      else if (c === ',') { row.push(field); field = ''; }
-      else if (c === '\n' || c === '\r') {
-        if (c === '\r' && text[i + 1] === '\n') i++;
-        row.push(field);
-        field = '';
-        if (row.length > 1 || row[0] !== '') rows.push(row);
-        row = [];
-      } else {
-        field += c;
-      }
-    }
-  }
-  if (field !== '' || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
-
-function cleanName(raw) {
-  // Strip trailing "(https://notion.so/...)" links from names
-  return (raw || '').replace(/\s*\(https?:\/\/[^)]*\)\s*$/i, '').trim();
-}
-
-function cleanRisk(raw) {
-  // Strip leading emoji/symbols, keep "On Track" / "At Risk" text
-  const v = (raw || '').trim();
-  if (/at risk/i.test(v)) return 'At Risk';
-  if (/on track/i.test(v)) return 'On Track';
-  return v.replace(/^[^\w]+/, '').trim();
-}
-
-const HEADER_ALIASES = {
-  'ids': 'id',
-  'students': 'name',
-  'year': 'year',
-  'student status': 'status',
-  'advisors': 'advisor',
-  'qe status': 'qe',
-  'proposal defense status': 'proposal',
-  'thesis defense status': 'thesisDefense',
-  'thesis submission': 'thesisSubmission',
-  'english requirement': 'english',
-  'ec approval': 'ec',
-  'publications': 'publications',
-  'risk status': 'risk',
-};
-
-function csvToStudents(text) {
-  const rows = parseCSV(text).filter(r => r.some(cell => cell.trim() !== ''));
-  if (!rows.length) throw new Error('The file appears to be empty.');
-
-  const header = rows[0].map(h => h.trim().toLowerCase());
-  const keyForCol = header.map(h => HEADER_ALIASES[h] || null);
-
-  if (!keyForCol.includes('id') || !keyForCol.includes('name')) {
-    throw new Error('Could not find expected columns (e.g. "IDs", "Students"). Please check the CSV format.');
-  }
-
-  const students = [];
-  for (let i = 1; i < rows.length; i++) {
-    const cells = rows[i];
-    const rec = {};
-    keyForCol.forEach((key, idx) => {
-      if (key) rec[key] = (cells[idx] || '').trim();
-    });
-    if (!rec.id && !rec.name) continue;
-
-    students.push({
-      id: rec.id || '',
-      name: cleanName(rec.name),
-      year: parseInt(rec.year, 10) || 0,
-      status: rec.status || '',
-      advisor: rec.advisor || '',
-      qe: rec.qe || '',
-      proposal: rec.proposal || '',
-      thesisDefense: rec.thesisDefense || '',
-      thesisSubmission: rec.thesisSubmission || '',
-      english: rec.english || '',
-      ec: rec.ec || '',
-      publications: parseInt(rec.publications, 10) || 0,
-      risk: cleanRisk(rec.risk),
-    });
-  }
-
-  if (!students.length) throw new Error('No student rows were found in the file.');
-  return students;
-}
-
-// ---- Rendering ----
-
 function badge(value) {
   const v = (value || '').toLowerCase();
   let cls = 'delayed';
@@ -280,10 +173,6 @@ function setupFilters() {
     riskFilter.appendChild(opt);
   });
 
-  document.getElementById('searchBox').value = '';
-  sortKey = null;
-  sortAsc = true;
-
   document.getElementById('searchBox').addEventListener('input', renderTable);
   riskFilter.addEventListener('change', renderTable);
   yearFilter.addEventListener('change', renderTable);
@@ -298,68 +187,22 @@ function setupFilters() {
   });
 }
 
-function renderDashboard(students) {
+function init() {
+  const students = loadStudents();
+  if (!students) {
+    window.location.href = 'index.html';
+    return;
+  }
   STUDENTS = students;
-  document.getElementById('uploadScreen').hidden = true;
-  document.getElementById('dashboard').hidden = false;
   renderStats();
   renderCharts();
   setupFilters();
   renderTable();
-}
 
-// ---- Upload handling ----
-
-function showUploadError(message) {
-  document.getElementById('uploadError').textContent = message;
-}
-
-function handleFile(file) {
-  if (!file) return;
-  showUploadError('');
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const students = csvToStudents(reader.result);
-      renderDashboard(students);
-    } catch (err) {
-      showUploadError(err.message || 'Failed to parse the CSV file.');
-    }
-  };
-  reader.onerror = () => showUploadError('Could not read the file.');
-  reader.readAsText(file, 'utf-8');
-}
-
-function setupUpload() {
-  const dropzone = document.getElementById('dropzone');
-  const input = document.getElementById('csvInput');
-  const changeFileBtn = document.getElementById('changeFileBtn');
-
-  input.addEventListener('change', () => handleFile(input.files[0]));
-
-  ['dragenter', 'dragover'].forEach(evt =>
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      dropzone.classList.add('dragover');
-    })
-  );
-  ['dragleave', 'drop'].forEach(evt =>
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      dropzone.classList.remove('dragover');
-    })
-  );
-  dropzone.addEventListener('drop', e => {
-    const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    handleFile(file);
-  });
-
-  changeFileBtn.addEventListener('click', () => {
-    document.getElementById('dashboard').hidden = true;
-    document.getElementById('uploadScreen').hidden = false;
-    showUploadError('');
-    input.value = '';
+  document.getElementById('changeFileBtn').addEventListener('click', () => {
+    clearStudents();
+    window.location.href = 'index.html';
   });
 }
 
-setupUpload();
+init();

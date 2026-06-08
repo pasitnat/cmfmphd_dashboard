@@ -2,11 +2,14 @@
 
 A static dashboard visualizing graduate student milestone progress (QE, proposal defense, thesis defense, English requirement, publications, and risk status).
 
-On load, it asks you to upload a Milestone Database CSV export (drag & drop or file picker), parses it in the browser, and then renders the dashboard — stat cards, charts, and a sortable/filterable table.
+It's split into two pages:
+
+- **`index.html`** — upload page. Choose or drag & drop a Milestone Database CSV export; it's parsed in the browser and stored in `sessionStorage`.
+- **`dashboard.html`** — dashboard page. Reads the parsed data and renders stat cards, charts, and a sortable/filterable table. Redirects back to the upload page if no data is present (e.g. visited directly, or after clicking "Upload a different CSV").
 
 ## Run locally
 
-Just open `index.html` in a browser, or serve the folder:
+Just open `index.html` in a browser, or serve the folder (recommended, since `sessionStorage` and navigation work more reliably over `http://`):
 
 ```
 npx serve .

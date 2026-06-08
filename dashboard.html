@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Milestone Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="header-row">
+    <div>
+      <h1>Milestone Dashboard</h1>
+      <div class="subtitle">Graduate student progress tracking</div>
+    </div>
+    <button id="changeFileBtn" class="ghost-btn">Upload a different CSV</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="charts">
+    <div class="chart-card"><h3>Risk Status</h3><canvas id="riskChart"></canvas></div>
+    <div class="chart-card"><h3>Students by Year</h3><canvas id="yearChart"></canvas></div>
+    <div class="chart-card"><h3>Milestone Progress (QE / Proposal / Thesis Defense)</h3><canvas id="milestoneChart"></canvas></div>
+    <div class="chart-card"><h3>Student Status</h3><canvas id="statusChart"></canvas></div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="searchBox" placeholder="Search by name, ID, or advisor..." />
+    <select id="riskFilter">
+      <option value="">All Risk Statuses</option>
+    </select>
+    <select id="yearFilter">
+      <option value="">All Years</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th data-key="id">ID</th>
+          <th data-key="name">Student</th>
+          <th data-key="year">Year</th>
+          <th data-key="status">Status</th>
+          <th data-key="advisor">Advisor</th>
+          <th data-key="qe">QE</th>
+          <th data-key="proposal">Proposal</th>
+          <th data-key="thesisDefense">Thesis Defense</th>
+          <th data-key="english">English</th>
+          <th data-key="publications">Pubs</th>
+          <th data-key="risk">Risk</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <footer>Generated from Milestone Database CSV &middot; <span id="count"></span> students</footer>
+
+<script src="shared.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
